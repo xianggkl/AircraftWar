@@ -1,0 +1,296 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+abstract class AbstractFlyingObject
+{
+    # int locationX
+    # int locationY
+    # int speedX
+    # int speedY
+    # BufferedImage image
+    # int width
+    # int height
+    # boolean isValid
+
+    + AbstractFlyingObject(int locationX, int locationY, int speedX, int speedY)
+    + forward():void
+    + crash(AbstractFlyingObject flyingObject):boolean
+    + setLocation(double locationX, double locationY):void
+    + getLocationX():int
+    + getLocationY():int
+    + getSpeedY():int
+    + getImage():BufferedImage
+    + getWidth():int
+    + getHeight():int
+    + notValid():boolean
+    + vanish():void
+}
+abstract class AbstractAircraft
+{
+	# int maxHp
+    # int hp
+    + AbstractAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    + decreaseHp(int decrease):void
+    + getHp():int
+    + {abstract} shoot():List<Bullet>
+    + {abstract} update():void
+ }
+
+class BaseBullet
+{
+    - int power
+    + BaseBullet(int locationX, int locationY, int speedX, int speedY, int power)
+    + forward():void
+	+ getPower():int
+}
+
+abstract class AbstractProp
+{
+    + AbstractProp(int locationX, int locationY, int speedX, int speedY)
+    + {abstract} PropActive():void
+}
+
+abstract class AbstractPublisher
+{
+    + List<T> observers
+    + {abstract} addObserver(T observer):void
+    + {abstract} addObserversList(List<T> observers):void
+    + {abstract} removeObserver(T observer):void
+    + {abstract} notifyAllObservers():void
+}
+
+abstract class Game {
+    + {abstract} getAircraft():AbstractAircraft
+    + {abstract} getDesImage():BufferedImage
+    + final action():void
+}
+
+interface IEnemyFactory
+{
+    + {abstract} GetEnemyAircraft():AbstractAircraft
+}
+
+interface IPropFactory
+{
+    + {abstract} GetEnemyProp(int x,int y):AbstractProp
+}
+
+interface PlayerDAO
+{
+    + {abstract} saveOnePlayerData(Path path, Player player):void
+    + {abstract} deleteOnePlayerData():void
+    + {abstract} getRankedPlayersData(Path path):List<String>
+    + {abstract} printPlayersDataList(Path path):void
+}
+
+interface AircraftStrategy
+{
+    + {abstract} aircraftShoot(AbstractAircraft aircraft):List<BaseBullet>
+}
+
+AbstractFlyingObject <|-- AbstractAircraft
+AbstractFlyingObject <|-- BaseBullet
+AbstractFlyingObject <|-- AbstractProp
+
+AbstractAircraft <|-- HeroAircraft
+AbstractAircraft <|-- MobEnemy
+AbstractAircraft <|-- EliteEnemy
+AbstractAircraft <|-- BossEnemy
+
+BaseBullet <|-- HeroBullet
+BaseBullet <|-- EnemyBullet
+
+AbstractProp <|-- BombProp
+AbstractProp <|-- FireProp
+AbstractProp <|-- HPProp
+
+AircraftStrategy <|.. ShootSpreadStrategy
+AircraftStrategy <|.. ShootStraightStrategy
+
+PlayerDAO <|.. PlayerDAOImpl
+
+IEnemyFactory <|..MobEnemyFactory
+IEnemyFactory <|..EliteEnemyFactory
+IEnemyFactory <|..BossEnemyFactory
+
+IPropFactory <|..BombPropFactory
+IPropFactory <|..HPPropFactory
+IPropFactory <|..FirePropFactory
+
+MobEnemy <..MobEnemyFactory
+EliteEnemy <..EliteEnemyFactory
+BossEnemy <..BossEnemyFactory
+
+BombProp <..BombPropFactory
+FireProp <..FirePropFactory
+HPProp <..HPPropFactory
+
+AbstractAircraft o-->AircraftStrategy
+MobEnemy o-->AircraftStrategy
+HeroAircraft o-->AircraftStrategy
+EliteEnemy o-->AircraftStrategy
+BossEnemy o-->AircraftStrategy
+
+PlayerDAOImpl -->Player
+
+BombPublisher --|> AbstractPublisher
+AbstractAircraft <-- BombPublisher
+
+BombPublisher <.. BombProp
+EasyGame --|> Game
+CommonGame --|> Game
+HardGame --|> Game
+
+
+class BombPublisher {
+    + addObserver(AbstractAircraft observer):void
+    + addObserversList(List<AbstractAircraft> observers):void
+    + removeObserver(List<AbstractAircraft> observer):void
+    + notifyAllObservers():void
+}
+
+class HeroAircraft {
+    - int shootNum
+    - int power
+    - int direction
+    - boolean isSpread
+    - HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp)
+    - _HeroAircraftInstance
+    + Get_HeroAircraftInstance():HeroAircraft
+    + forward():void
+    + shoot():List<Bullet>
+    + shootSpread():List<BaseBullet>
+    + setSpread(boolean b):void
+    + update():void
+}
+
+class MobEnemy {
+    - AbstractProp prop
+    + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<Bullet>
+    + getProp():AbstractProp
+    - DropProp():AbstractProp
+    + update():void
+}
+
+class EliteEnemy {
+    - int shootNum
+    - int power
+    - int direction
+    + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<Bullet>
+    + getProp():AbstractProp
+    - DropProp():AbstractProp
+    + update():void
+}
+
+class BossEnemy {
+    - int shootNum
+    - int power
+    - int direction
+    + BossEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + forward():void
+    + shoot():List<Bullet>
+    + getProp():AbstractProp
+    - DropProp():AbstractProp
+    + update():void
+}
+
+class HeroBullet {
+    + HeroBullet(int locationX, int locationY,
+     int speedX, int speedY, int power)
+}
+
+class EnemyBullet {
+    + EnemyBullet(int locationX, int locationY,
+     int speedX, int speedY, int power)
+}
+
+class BombProp {
+    + BombProp(int locationX, int locationY,
+    int speedX, int speedY)
+    + PropActive():void
+}
+
+class FireProp {
+    + FireProp(int locationX, int locationY,
+    int speedX, int speedY)
+    + PropActive():void
+}
+
+class HPProp {
+    + HPProp(int locationX, int locationY,
+    int speedX, int speedY)
+    + PropActive():void
+}
+
+class MobEnemyFactory {
+    + GetEnemyAircraft():AbstractAircraft
+}
+
+class EliteEnemyFactory {
+    + GetEnemyAircraft():AbstractAircraft
+}
+
+class BossEnemyFactory {
+    + GetEnemyAircraft():AbstractAircraft
+}
+
+class BombPropFactory {
+    + GetEnemyProp(int x,int y):AbstractProp
+}
+
+class HPPropFactory {
+    + GetEnemyProp(int x,int y):AbstractProp
+}
+
+class FirePropFactory {
+    + GetEnemyProp(int x,int y):AbstractProp
+}
+
+class Player {
+    - String playerName
+    - int playerScore
+    - Date playerEndingDate
+    + Player()
+    + Player(String playerName, int playerScore)
+    + getStringPlayerData():String
+}
+
+class PlayerDAOImpl{
+    + saveOnePlayerData(Path path, Player player):void
+    + deleteOnePlayerData():void
+    + getRankedPlayersData(Path path):List<String>
+    + printPlayersDataList(Path path):void
+    - sortPlayersDataByScore(List<String> playerDataStrings):List<String>
+}
+
+class ShootSpreadStrategy{
+    + aircraftShoot(AbstractAircraft aircraft):List<BaseBullet>
+}
+
+class ShootStraightStrategy{
+    + aircraftShoot(AbstractAircraft aircraft):List<BaseBullet>
+}
+
+class EasyGame {
+    + EasyGame()
+    + getAircraft():AbstractAircraft
+    + getDesImage():BufferedImage
+}
+
+class CommonGame {
+    + CommonGame()
+    + getAircraft():AbstractAircraft
+    + getDesImage():BufferedImage
+}
+
+class HardGame {
+    + HardGame()
+    + getAircraft():AbstractAircraft
+    + getDesImage():BufferedImage
+}
+
+@enduml
